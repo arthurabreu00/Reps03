@@ -1,15 +1,15 @@
 class UserController {
  
-    constructor(formId, tableId) {
+    constructor(formId, formIdUpdate, tableId) {
  
         this.formEl = document.getElementById(formId);
+        this.formUpdateEl = document.getElementById(formIdUpdate);
         this.tableEl = document.getElementById(tableId);
- 
+     
         this.onSubmit();
         this.onEdit();
- 
+     
     } // Fechando o Constructor
- 
     onEdit() {
  
         document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e => {
