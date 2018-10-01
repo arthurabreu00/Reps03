@@ -28,6 +28,7 @@ class UserController {
             btn.disable = true;
 
             let values = this.getValues(this.formUpdateEl);
+            
 
             let index = this.formUpdateEl.dataset.trIndex;
 
@@ -48,36 +49,26 @@ class UserController {
                         result._photo = content;
                     }
 
-                    tr.dataset.user = JSON.stringify(result);
+                    let user = new User();
 
-                    tr.innerHTML =
-                        `
-                            <tr>
-                                <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                                <td> ${result._name}</td>
-                                <td>${result._email}</td>
-                                <td>${(result._admin) ? "Sim" : "Não"}</td>
-                                <td>${(Utils.dateFormat(result._register))} </td>
-                                <td>
-                                    <button type="button" class="btn btn-primary btn-xs btn-flat btn-edit">Editar</button>
-                                    <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-                                </td>
-                            </tr> 
-                        `;
+                    user.loadFromJSON(result)
+                    
+                    user.save();
 
-                    this.addEventsTr(tr);
+                    this.getTr(user,tr)
+
 
                     this.updateCount();
                     this.formUpdateEl.reset();
 
                     btn.disable = false;
 
-                    this.showPanelCreate();
                 },
                 (e) => {
                     console.error(e)
                 });
 
+            this.showPanelCreate();
 
         });
 
@@ -104,7 +95,7 @@ class UserController {
                 (content) => {
                     values.photo = content;
 
-                    this.insert(values);
+                    values.save();
 
                     this.addLine(values);
 
@@ -218,22 +209,10 @@ class UserController {
     } // Fechando o Método getValues();
 
 
-    getUsersStorage(){
-
-        let users = [];
-
-        if(sessionStorage.getItem("users")){
-
-            users = JSON.parse(sessionStorage.getItem("users"))
-
-        }
-
-        return users;
-    }
 
     selectAll(){
 
-        let users = this.getUsersStorage();
+        let users = User.getUsersStorage();
 
         users.forEach(dataUser =>{
             
@@ -248,51 +227,61 @@ class UserController {
 
     }
 
-    insert(data){
-
-        let users = this.getUsersStorage();
-        users.push(data);
-        sessionStorage.setItem("users",JSON.stringify(users))
-
-    }
 
     addLine(dataUser) {
-
-        let tr = document.createElement("tr");
         
-    
+        let tr = this.getTr(dataUser)
 
-        tr.dataset.user = JSON.stringify(dataUser);
-
-        tr.innerHTML =
-            `
-            <tr>
-                <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
-                <td> ${dataUser.name}</td>
-                <td>${dataUser.email}</td>
-                <td>${(dataUser.admin) ? "Sim" : "Não"}</td>
-                <td>${(Utils.dateFormat(dataUser.register))} </td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-xs btn-flat btn-edit">Editar</button>
-                    <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
-                </td>
-            </tr> 
-        `;
-
-
-        this.addEventsTr(tr);
         this.tableEl.appendChild(tr);
+       
         this.updateCount();
 
 
     } // Fechando o Método addLine()
+
+    getTr(dataUser,tr = null){
+
+        if(tr === null)tr = document.createElement('tr');
+
+        tr.dataset.user = JSON.stringify(dataUser);
+
+        tr.innerHTML =
+        `
+        <tr>
+            <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
+            <td> ${dataUser.name}</td>
+            <td>${dataUser.email}</td>
+            <td>${(dataUser.admin) ? "Sim" : "Não"}</td>
+            <td>${(Utils.dateFormat(dataUser.register))} </td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs btn-flat btn-edit">Editar</button>
+                <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
+            </td>
+        </tr> 
+    `;
+
+    this.addEventsTr(tr);
+    
+        return tr
+    }
+
 
     addEventsTr(tr) {
 
         tr.querySelector(".btn-delete").addEventListener("click", e => {
 
             if(confirm("Deseja realmente excluir ?")){
+
+                let user = new User();
+
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+
+                user.delete()
+
                 tr.remove();
+
+                this.showPanelCreate();
+
                 this.updateCount();
             }
 
