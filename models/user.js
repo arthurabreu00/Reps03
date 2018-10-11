@@ -1,6 +1,6 @@
-class User{
+class User {
 
-    constructor(name,gender,birth,country,email,password, photo, admin){
+    constructor(name, gender, birth, country, email, password, photo, admin){
 
         this._id;
         this._name = name;
@@ -27,31 +27,31 @@ class User{
         return this._name;
     }
 
-    get gender(){
+    get gender() {
         return this._gender;
     }
 
-    get birth(){
+    get birth() {
         return this._birth;
     }
 
-    get country(){
+    get country() {
         return this._country;
     }
 
-    get email(){
+    get email() {
         return this._email;
     }
 
-    get password(){
-        return this._password;
-    }
-
-    get photo(){
+    get photo() {
         return this._photo;
     }
 
-    get admin(){
+    get password() {
+        return this._password;
+    }
+
+    get admin() {
         return this._admin;
     }
 
@@ -61,82 +61,82 @@ class User{
 
     loadFromJSON(json){
 
-        for(let name in json){
+        for (let name in json){
+            
+            switch(name){
 
-            switch (name) {
                 case '_register':
                     this[name] = new Date(json[name]);
-                    break;
-            
+                break;
                 default:
                     this[name] = json[name];
-                
+
             }
+            
 
         }
 
     }
 
-    
-    static getUsersStorage(){
+    static getUsersStorage() {
 
         let users = [];
 
-        if(localStorage.getItem("users")){
+        if (localStorage.getItem("users")) {
 
-            users = JSON.parse(localStorage.getItem("users"))
+            users = JSON.parse(localStorage.getItem("users"));
 
         }
 
         return users;
+
     }
 
-    getNewId(){
+    getNewID(){
 
-        let userId = parseInt(localStorage.getItem("userId"));
+        let usersID = parseInt(localStorage.getItem("usersID"));
 
-        if(!window.id > 0) userId = 0
+        if (!usersID > 0) usersID = 0;
 
-        userId++;
-        
-        localStorage.setItem("userId",userId)
+        usersID++;
 
-        return userId
+        localStorage.setItem("usersID", usersID);
+
+        return usersID;
 
     }
 
     save(){
 
-
         let users = User.getUsersStorage();
 
-        if(this.id > 0){
+        if (this.id > 0) {
+            
+            users.map(u=>{
 
-            user.map(u=>{
+                if (u._id == this.id) {
 
-                if(u._id == this.id){
+                    Object.assign(u, this);
 
-                    Object.assign(u,this)
-
-                }   
+                }
 
                 return u;
 
-            })
+            });
 
-        } else{
+        } else {
 
-            this._id = this.getNewId();
+            this._id = this.getNewID();
 
             users.push(this);
-    
+
         }
 
-        localStorage.setItem("users",JSON.stringify(users))
+        localStorage.setItem("users", JSON.stringify(users));
 
     }
 
-    delete(){
+    remove(){
 
         let users = User.getUsersStorage();
 
